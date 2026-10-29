@@ -1,0 +1,40 @@
+# macOS
+.DS_Store
+._*
+
+# Machine-local toolchains and settings
+/.toolchains/
+/.local/
+/.cache/
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.local
+/.idea/
+/.vscode/
+
+# Firmware build products and downloaded components
+build/
+dist/
+managed_components/
+sdkconfig
+sdkconfig.old
+*.bin
+*.elf
+*.map
+
+# Python and Node environments
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+node_modules/
+
+# Local logs and recordings
+*.log
+/recordings/
+/projects/*/recordings/
