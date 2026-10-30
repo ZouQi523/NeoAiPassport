@@ -1,26 +1,105 @@
-# NeoAiPassport 工作约定
+<p align="right">
+  <a href="AGENTS.zh_CN.md">简体中文</a> · <strong>English</strong>
+</p>
 
-## 范围
+# Repository Guidelines for AI Agents
 
-这是承载多个 AI Passport 应用的单一 Git 仓库。先阅读根 README，再阅读目标应用的 README。保留用户已有修改，修改前检查 Git 状态。
+This file is the only mandatory entry point for AI-assisted work in this repository. Read task-specific documents from the routing table below; do not load every README by default.
 
-## 目录边界
+## Required AI skills
 
-- `projects/<name>/` 包含该应用的设备端、必要的电脑端、测试和文档。
-- `docs/` 记录公共硬件资料、环境配置和已确认的工程决策。
-- `shared/` 只放实际被多个应用复用的工具或资源，不提前抽象应用逻辑。
-- `.toolchains/` 放本机工具链，不纳入 Git。不要提交缓存、凭据、个人录音或本机专用路径。
-- 新应用遵循既有目录模式，不在应用内初始化嵌套 Git 仓库。
+The following five skills are required for AI-assisted development in this repository:
+`passport-develop`, `passport-setup`, `passport-build`, `passport-device-test`, and
+`passport-debug`. Their maintained sources are under `skills/`.
 
-## 当前阶段
+Before starting development, the AI must check that all five are installed and
+available in its current environment. If any are missing, the AI must choose an
+appropriate installation method for its tool and environment, perform the
+installation, and verify availability itself. Do not wait for the user to request
+installation or make the user choose the method or run installation commands.
+No particular script, installation directory, or AI client is mandatory.
 
-首个方向为麦克风应用，目前没有固件或电脑端实现。通用音频输入与语音打字的产品目标尚未确定；不要将待讨论项视为已批准需求，不开发木鱼应用。
+Respect the environment's approval requirements and preserve existing skills
+and user configuration. If permissions, conflicts, or platform limitations prevent
+installation, explain the blocker and request only the necessary user action;
+do not claim installation succeeded. Having all five available does not mean
+loading or invoking all five for every task: use only the matching skills, and
+retain the separate authorization requirements for flashing, Git writes, and publishing.
 
-## 实现与验证
+## Project and safety baseline
 
-- 引入官方或第三方源码前，检查对应版本的开发要求和许可证，保留来源和版权信息。
-- 涉及设备能力时依据官方接口及实测结果，不因 USB 连接就假设支持 USB 音频。
-- 安装依赖和开发环境前检查已有环境，避免修改全局配置；项目环境优先保持隔离。
-- 提供真实执行过的构建及测试结果，将电脑端测试与实机验证分开说明。
-- 烧写设备、清空设备存储和发布固件前，取得用户对具体操作的授权。设备已连接不等于同意烧录。
-- 不自动提交、推送或发布；当前任务得到明确授权时按授权范围执行。
+- Target: ESP32-C3, 8 MB Flash, no PSRAM, ESP-IDF 5.5.3.
+- Keep the repository's default partition table minimal: NVS, PHY data, and
+  one factory application spanning the rest of the 8 MB Flash. User firmware
+  may deliberately change this layout; validate the resulting table and do not
+  turn product-specific partitions into mandatory template contracts.
+- Preserve existing user changes. Start with `git status --short --branch`; never overwrite or clean unrelated files.
+- Flashing new firmware does not require backing up the firmware already on the device; do not make a Flash readback a prerequisite. This does not guarantee preservation of user data or authorize a full-chip erase. Follow the [flashing and data policy](docs/development/engineering/firmware-layout.md#flashing-and-stored-data).
+- Hardware facts follow this priority: product specifications and measured results → `components/bsp/include/bsp_pins.h` → BSP headers and implementation → hardware guide → README/demo code. If a task requires a hardware detail not defined by these sources, ask the user instead of guessing.
+- Reusable board logic belongs in `components/bsp`; pages, state machines, animations, and application tasks belong in `main`.
+- Derivative applications must redesign and implement their own UI. Reusing the current demo test menu, screens, or visual shell is prohibited; renaming, recoloring, or adding a feature to that shell does not count as a redesign. BSP APIs and non-UI logic remain reusable. See the [mandatory UI redesign rule](docs/development/ai-guide.md#mandatory-ui-redesign-for-derivative-applications).
+- LVGL is not thread-safe. Code outside the LVGL task must hold `bsp_lvgl_lock()` while accessing LVGL objects.
+- Before adding Chinese UI text, follow the [font checklist](docs/development/engineering/coding-conventions.md#chinese-fonts-and-missing-glyphs). The default Montserrat fonts have no Chinese glyphs; UTF-8 and a successful build do not prove display support. Verify glyph coverage, widget font selection, and on-device rendering.
+- Button callbacks must stay non-blocking. Audio, storage, networking, and other slow operations belong in worker tasks.
+- A demo must stop every task, timer, callback, and event handler that can access its UI before deleting the screen.
+- Keep testable state machines, protocols, timing, and layout calculations independent from ESP-IDF/LVGL and cover them with host tests.
+- Never commit credentials, device QR secrets, private keys, personal data, or unsanitized logs.
+- Every maintained Markdown document uses English at its default `.md` path and Simplified Chinese in a paired `.zh_CN.md` file. Keep both versions aligned and retain reciprocal language links.
+
+## Task-specific context routing
+
+| Task | Read before editing |
+| --- | --- |
+| Any code change | `docs/development/ai-guide.md`, relevant headers and neighboring implementation |
+| Application workflow or core skill setup | `skills/README.md`; ensure the five required skills are available, then use only the matching skill |
+| Environment bootstrap or missing toolchain | `docs/development/engineering/environment-setup.md` |
+| BSP, pins, buses, display, audio, battery | `docs/hardware-design/AI_HARDWARE_DEVELOPMENT_GUIDE.md`, `components/bsp/include/bsp_pins.h` |
+| Demo or menu | `main/demo.h`, `main/main.c`, the nearest `main/demo_*.c` implementation |
+| Chinese UI text or fonts | `docs/development/engineering/lvgl-chinese-fonts.md`, the application's font assets, configuration, and widget styles |
+| Wi-Fi connection or Bluetooth provisioning | `docs/development/engineering/wifi-provisioning.md`, the referenced `demo/blufi-provisioning` implementation |
+| Build, test, dependencies, partitions | `docs/development/engineering/build-and-test.md`, `docs/development/engineering/firmware-layout.md`, `sdkconfig.defaults`, `partitions.csv` |
+| CI or release | the matching file in `docs/development/ci/CI-*.md` and `.github/workflows/` |
+| Project completion | `docs/development/release/project-completion.md` (then the `issue-suggestions` or `experience-pr` skill) |
+| Documentation | `docs/contribution/doc-conventions.md`, `docs/README.md` |
+| Commit or PR | `docs/contribution/commit-and-pr.md` |
+
+Use `docs/README.md` for the product overview and the documentation index. For the detailed AI development workflow — context setup, source-of-truth priority, application/BSP boundary, runtime invariants, material placement, and delivery format — read `docs/development/ai-guide.md`. Fork-specific workflow is in `docs/fork-guide.md` and is not required for ordinary upstream development.
+
+## Required validation and delivery
+
+Run the smallest relevant check while iterating, then run the complete gate before delivery:
+
+```bash
+./tools/validate.sh --static    # repository checks + host tests
+./tools/validate.sh --firmware  # ESP-IDF build + merged-image verification
+./tools/validate.sh             # complete gate
+```
+
+The complete gate requires an activated ESP-IDF 5.5.3 environment. Do not describe a successful build as hardware validation. Final delivery must report these fields separately:
+
+```text
+Build: PASS / FAIL / NOT RUN
+Host tests: PASS / FAIL / NOT RUN
+Device tests: PASS / FAIL / NOT RUN
+Unverified: remaining board, instrument, or user checks
+```
+
+After each complete implementation of a user-requested firmware change,
+proactively ask whether to flash it to the device for testing; do not wait for
+a release request. If no device is detected, ask the user to turn it on and
+connect it to a computer USB port with a data-capable cable. Follow the
+[on-device testing handoff](docs/development/ai-guide.md#offer-on-device-testing)
+and obtain approval before flashing; detection alone is not consent.
+
+Create commits and push only when the user requests them or the active workflow explicitly requires them. Ordinary feature, application, and documentation pull requests must not edit `docs/CHANGELOG.md` or `docs/CHANGELOG.zh_CN.md`; describe user-visible behavior, compatibility, and release-flow impact in the pull-request body and authoritative documentation instead. During release preparation, the release maintainer aggregates merged user-visible changes into both changelog files before creating the tag.
+
+Community guidance is in `.github/CONTRIBUTING.md`, `.github/CODE_OF_CONDUCT.md`, `.github/SECURITY.md`, and `.github/SUPPORT.md`.
+
+## NeoAiPassport project scope
+
+- Read the root [README](README.md) and [project notes](docs/assets/readme.md) for this checkout's accepted requirements and pending decisions.
+- Use the official root-level layout; do not restore the retired `projects/` or `shared/` scaffold or initialize nested application Git repositories. Isolated SDK checkouts under ignored `.toolchains/` are development tools, not application repositories.
+- The active application on `feature/countdown-bomb` is an offline countdown-and-defuse game. Its requirements and defaults are in `docs/assets/countdown-bomb.md`. The Microphone application remains stopped.
+- Keep a future Mac companion in `desktop/`. Local toolchains, caches, credentials, and personal recordings must remain outside version control; `.toolchains/` is available for an isolated local environment.
+- Preserve existing history and the configured `origin`. The source-snapshot import does not authorize resetting `main` to upstream or rewriting remote history.
+- Never commit, push, publish, flash, or erase device storage automatically; obtain the user's explicit authorization for the concrete operation.

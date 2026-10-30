@@ -1,0 +1,16 @@
+{
+  "source": "xm4167.mp3",
+  "source_sha256": "2a0d66f873746fbc1db034a48e950493c47fb9608efdb4dde6f2ab7978c5526d",
+  "source_decoded_samples_16khz": 30336,
+  "gain": 0.8781880054154927,
+  "pcm_sha256": "7f174cd62f72279e94dac4e7b134c593a30b38ee75ae1e8d3ca5ab1fe5d0081d",
+  "pcm_bytes": 61440,
+  "rate": 16000,
+  "bits": 16,
+  "channels": 1,
+  "duration_ms": 1920.0,
+  "tail_silence_min_ms": 128,
+  "chunk_samples": 512,
+  "ffmpeg": "ffmpeg version 8.0.1 Copyright (c) 2000-2025 the FFmpeg developers",
+  "license": "User supplied; no separate license provided."
+}

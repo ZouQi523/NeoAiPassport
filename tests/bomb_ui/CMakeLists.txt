@@ -1,0 +1,13 @@
+cmake_minimum_required(VERSION 3.16)
+project(bomb_ui_preview C)
+get_filename_component(REPO "${CMAKE_CURRENT_LIST_DIR}/../.." ABSOLUTE)
+set(LV_BUILD_CONF_PATH "${CMAKE_CURRENT_LIST_DIR}/lv_conf.h" CACHE PATH "" FORCE)
+set(CONFIG_LV_BUILD_DEMOS OFF CACHE BOOL "" FORCE)
+set(CONFIG_LV_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(CONFIG_LV_USE_THORVG_INTERNAL OFF CACHE BOOL "" FORCE)
+add_subdirectory("${REPO}/managed_components/lvgl__lvgl" lvgl)
+add_executable(bomb_ui_preview preview.c "${REPO}/main/bomb_game.c"
+    "${REPO}/main/bomb_ui.c" "${REPO}/assets/fonts/bomb_font_18.c")
+target_include_directories(bomb_ui_preview PRIVATE "${REPO}/main")
+target_link_libraries(bomb_ui_preview PRIVATE lvgl)
+target_compile_options(bomb_ui_preview PRIVATE -UNDEBUG)

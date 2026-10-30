@@ -1,0 +1,17 @@
+#pragma once
+#define LV_CONF_H
+#define LV_COLOR_DEPTH 16
+#define LV_USE_OS 0
+#define LV_MEM_SIZE (32U * 1024U)
+#define LV_FONT_MONTSERRAT_14 1
+#define LV_FONT_MONTSERRAT_20 1
+#define LV_FONT_MONTSERRAT_32 1
+#define LV_FONT_MONTSERRAT_40 1
+#define LV_FONT_MONTSERRAT_48 1
+#define LV_USE_THORVG_INTERNAL 0
+#define LV_USE_LOG 1
+#define LV_LOG_LEVEL 2
+#define LV_USE_ASSERT_NULL 1
+#define LV_USE_ASSERT_MALLOC 1
+#define LV_ASSERT_HANDLER_INCLUDE "stdlib.h"
+#define LV_ASSERT_HANDLER abort();
